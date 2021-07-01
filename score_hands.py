@@ -20,10 +20,19 @@ def get_scores_dict():
     return ranks_score_dict
 
 
-HANDS_RANKS_SCORE_DICT = get_scores_dict()
+HANDS_RANKS_SCORE_DICT = None
 
 
 def get_hand_score(hand):
+    """
+    Scores a given hand. Implements a singleton on variable HANDS_RANKS_SCORE_DICT
+    so that it is loaded into memory only once.
+    :param hand: a hand.
+    :return:  the score of the hand.
+    """
+    global HANDS_RANKS_SCORE_DICT
+    if HANDS_RANKS_SCORE_DICT is None:
+        HANDS_RANKS_SCORE_DICT = get_scores_dict()
     return HANDS_RANKS_SCORE_DICT[str(hand).replace(",", "")]
 
 

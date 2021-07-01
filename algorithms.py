@@ -59,7 +59,7 @@ def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
             total_sum_p1_points, total_sum_p1_points_squared = simulate_game(
                 strategy_profile=s,
                 game=game,
-                random_cards=random_cards,
+                list_of_dealer_cards=random_cards,
             )
 
             # Accumulate stats.
