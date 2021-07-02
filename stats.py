@@ -1,3 +1,5 @@
+import math
+
 from poker import sample_game, simulate_game, draw_randomness
 import itertools as it
 import pprint
@@ -72,10 +74,35 @@ def compute_v_1_inf(game_stats):
     return sum([stats["variance"] for stats in game_stats.values()])
 
 
+def compute_sample_complexity(schedule_length, epsilon, delta, v_inf, game, c=2):
+    return 2 + 4 * math.log(3 * schedule_length * game["size_of_game"] / delta) * (
+        2 * c / epsilon + v_inf / epsilon ** 2
+    )
+
+
+def compute_simulation_complexity(schedule_length, epsilon, delta, v_1_inf, game, c=2):
+    return 2 + 4 * math.log(3 * schedule_length * game["size_of_game"] / delta) * (
+        2 * c * game["size_of_game"] / 2 * epsilon + v_1_inf / epsilon ** 2
+    )
+
+
+def compute_bounds(schedule_length, epsilon, delta, v_inf, v_1_inf, game, c=2):
+    return (
+        compute_sample_complexity(
+            schedule_length, epsilon, delta, v_inf, game, c
+        ),
+        compute_simulation_complexity(
+            schedule_length, epsilon, delta, v_1_inf, game, c
+        ),
+    )
+
+
 if __name__ == "__main__":
 
     # Draw a random game.
-    some_game = sample_game(num_discard_cards=2, bet_grid=["*"])
+    some_game = sample_game(
+        num_discard_cards=2,
+    )
     some_game_stats = compute_game_stats(some_game)
 
     # Print game stats.

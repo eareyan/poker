@@ -21,10 +21,14 @@ def compute_stats(U, V, m, c, delta, T, size_of_game):
     return eps
 
 
+def compute_schedule_length(target_epsilon, c=2.0, beta=2.0):
+    return math.ceil(math.log((3.0 * c) / (4.0 * target_epsilon), beta))
+
+
 def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
 
     # Initialize schedule and other structures.
-    T = math.log((3.0 * c) / (4.0 * target_epsilon), beta)
+    T = compute_schedule_length(target_epsilon, c, beta)
     S = len(game["strategy_profiles"].keys())
     alpha = ((2.0 * c) / (3.0 * target_epsilon)) * math.log(
         (3.0 * T * S) / target_delta
@@ -36,18 +40,19 @@ def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
 
     psp_stats = {
         "stats": stats,
-        "schedule": [
-            math.ceil(alpha * (beta ** t)) for t in range(1, math.ceil(T) + 1)
-        ],
+        "schedule": [math.ceil(alpha * (beta ** t)) for t in range(1, T + 1)],
         "active_set_len": [game["size_of_game"]],
     }
 
     # Iterate as per the schedule
-    for t in range(1, math.ceil(T) + 1):
+    for t in range(1, T + 1):
 
         # Compute number of samples
         m_marginal = math.ceil(alpha * (beta ** t)) - m
         m = math.ceil(alpha * (beta ** t))
+
+        # Record number of samples used
+        psp_stats["final_m"] = m
 
         # Draw randomness. In poker, draw dealer cards.
         random_cards = draw_randomness(game, m_marginal)

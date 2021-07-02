@@ -109,7 +109,7 @@ def get_deck():
     ]
 
 
-def sample_game(num_discard_cards, bet_grid):
+def sample_game(num_discard_cards, bet_grid=["*"]):
     """
     Samples a random game.
     :param num_discard_cards: an integer encoding how many cards each player must discard.
