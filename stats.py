@@ -5,7 +5,7 @@ import itertools as it
 import pprint
 
 
-def compute_mean_strategy_profile(strategy_profile, dealer_cards, game):
+def compute_strategy_profile_stats(strategy_profile, dealer_cards, game):
     """
     Given a game, computes a map as follows:
             {'mean' : mean,
@@ -39,7 +39,7 @@ def compute_game_stats(game):
         list(x) for x in it.combinations(game["deck"], game["num_discard_cards"])
     ]
     return {
-        sp: compute_mean_strategy_profile(sp, dealer_cards_of_game, game)
+        sp: compute_strategy_profile_stats(sp, dealer_cards_of_game, game)
         for sp in game["strategy_profiles"].keys()
     }
 
