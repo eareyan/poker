@@ -42,6 +42,8 @@ def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
         "stats": stats,
         "schedule": [math.ceil(alpha * (beta ** t)) for t in range(1, T + 1)],
         "active_set_len": [game["size_of_game"]],
+        "emp_simulation_complexity": 0,
+        "emp_sample_complexity": 0,
     }
 
     # Iterate as per the schedule
@@ -51,11 +53,14 @@ def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
         m_marginal = math.ceil(alpha * (beta ** t)) - m
         m = math.ceil(alpha * (beta ** t))
 
-        # Record number of samples used
-        psp_stats["final_m"] = m
+        # Record number of samples used - sample complexity
+        psp_stats["emp_sample_complexity"] = m
 
         # Draw randomness. In poker, draw dealer cards.
         random_cards = draw_randomness(game, m_marginal)
+
+        # Simulation complexity: sum of the number of samples processed times the number of strategy profiles that are active
+        psp_stats["emp_simulation_complexity"] += m_marginal * len(active_set)
 
         # Loop through every active strategy profile, s.
         for s in active_set:

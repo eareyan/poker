@@ -44,7 +44,8 @@ if __name__ == "__main__":
                 v_1_inf,
                 sample_complexity,
                 simulation_complexity,
-                psp_stats["final_m"],
+                psp_stats["emp_sample_complexity"],
+                psp_stats["emp_simulation_complexity"],
             ]
         )
 
@@ -56,7 +57,8 @@ if __name__ == "__main__":
             "v_1_inf",
             "sample_complexity",
             "simulation_complexity",
-            "final_m",
+            "emp_sample_complexity",
+            "emp_simulation_complexity",
         ],
     )
     results_df.to_csv("results/test.csv", index=False)
