@@ -10,8 +10,12 @@ def compute_stats(U, V, m, c, delta, T, size_of_game):
 
     log_term = math.log(3 * size_of_game * T / delta)
 
-    v_tilde = (c * c * log_term) / (m - 1) + math.sqrt(
-        (c * c * log_term / (m - 1)) ** 2 + (2 * c * c * v_hat * log_term / (m - 1))
+    v_tilde = (
+        v_hat
+        + (c * c * log_term) / (m - 1)
+        + math.sqrt(
+            (c * c * log_term / (m - 1)) ** 2 + (2 * c * c * v_hat * log_term / (m - 1))
+        )
     )
 
     eps = min(
