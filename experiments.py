@@ -12,7 +12,7 @@ from stats import (
 
 if __name__ == "__main__":
     # Parameters
-    target_epsilon = 0.25
+    target_epsilon = 0.025
     target_delta = 0.1
 
     # Draw a random game.

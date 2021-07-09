@@ -39,7 +39,6 @@ def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
     )
     active_set = game["strategy_profiles"].keys()
     stats = {strategy_profile: {"U": 0, "V": 0} for strategy_profile in active_set}
-    epsilon_map = {strategy_profile: math.inf for strategy_profile in active_set}
     m = 0
 
     psp_stats = {
@@ -48,6 +47,7 @@ def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
         "active_set_len": [game["size_of_game"]],
         "emp_simulation_complexity": 0,
         "emp_sample_complexity": 0,
+        "epsilon_map": {strategy_profile: math.inf for strategy_profile in active_set},
     }
 
     # Iterate as per the schedule
@@ -81,7 +81,7 @@ def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
             stats[s]["V"] = stats[s]["V"] + total_sum_p1_points_squared
 
             # Compute and store epsilon for this strategy profile.
-            epsilon_map[s] = compute_stats(
+            psp_stats["epsilon_map"][s] = compute_stats(
                 stats[s]["U"],
                 stats[s]["V"],
                 m,
@@ -94,7 +94,7 @@ def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
         active_set = {
             strategy_profile
             for strategy_profile in active_set
-            if epsilon_map[strategy_profile] > target_epsilon
+            if psp_stats["epsilon_map"][strategy_profile] > target_epsilon
         }
         psp_stats["active_set_len"].append(len(active_set))
 
