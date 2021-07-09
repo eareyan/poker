@@ -40,6 +40,7 @@ if __name__ == "__main__":
         pprint.pprint(psp_stats)
         results.append(
             [
+                game["size_of_game"],
                 v_inf,
                 v_1_inf,
                 sample_complexity,
@@ -53,6 +54,7 @@ if __name__ == "__main__":
     results_df = pd.DataFrame(
         results,
         columns=[
+            "size_of_game",
             "v_inf",
             "v_1_inf",
             "sample_complexity",
