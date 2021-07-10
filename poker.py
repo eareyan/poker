@@ -17,6 +17,8 @@ def create_game(game_parameters):
     :return: a dictionary.
     """
     return {
+        # id is supposed to "uniquely" identify a game
+        "id": random.randint(10000000, 99999999),
         "deck": game_parameters["deck"],
         "num_discard_cards": game_parameters["num_discard_cards"],
         "hand_p1": game_parameters["hand_p1"],
