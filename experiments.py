@@ -6,7 +6,7 @@ import time
 import pandas as pd
 
 from algorithms import psp, compute_schedule_length
-from poker import sample_game
+from poker import *
 from stats import (
     compute_game_stats,
     compute_v_inf,
@@ -15,9 +15,12 @@ from stats import (
 )
 
 
-def generate_and_save_game(num_discard_cards, target_epsilon, target_delta):
+def generate_and_save_game(num_discard_cards, target_epsilon, target_delta, beta):
     # Draw a random game.
     game = sample_game(num_discard_cards=num_discard_cards)
+    #game = generate_rigged_game()
+
+
 
     # Compute the game's stats.
     game_stats = compute_game_stats(game=game)
@@ -26,12 +29,13 @@ def generate_and_save_game(num_discard_cards, target_epsilon, target_delta):
 
     # Compute sample complexity and Simulation complexity.
     sample_complexity, simulation_complexity = compute_bounds(
-        schedule_length=compute_schedule_length(target_epsilon),
+        schedule_length=compute_schedule_length(target_epsilon, beta=beta),
         epsilon=target_epsilon,
         delta=target_delta,
         v_inf=v_inf,
         v_1_inf=v_1_inf,
         game=game,
+        beta=beta
     )
 
     pd.DataFrame(
@@ -55,12 +59,12 @@ def generate_and_save_game(num_discard_cards, target_epsilon, target_delta):
     return game
 
 
-def psp_run_and_save_stats(game, target_epsilon, target_delta, number_psp_runs):
+def psp_run_and_save_stats(game, target_epsilon, target_delta, number_psp_runs, beta):
 
     # Run PSP multiple times, collect and save stats.
     results = []
     for _ in range(0, number_psp_runs):
-        psp_stats = psp(game, target_epsilon, target_delta)
+        psp_stats = psp(game, target_epsilon, target_delta, beta=beta)
         # pprint.pprint(psp_stats)
         results.append(
             [
@@ -110,23 +114,30 @@ if __name__ == "__main__":
     check_if_results_file_exists()
 
     # Fixed parameters: delta, and the number of psp runs.
-    exp_target_delta = 1 / 10 ** 6
-    exp_number_psp_runs = 10
+    exp_target_delta = 1e-2
+    exp_number_psp_runs = 1
+
+    #beta = 2
+    #beta = 1.25
+    beta = 1.1
+    #beta = 1.05
 
     for _, exp_num_discard_cards, exp_target_epsilon in it.product(
-        range(10), [1, 2], [0.25, 0.1]
+        range(1), [1, 2], [0.01]
     ):
         t0 = time.time()
         random_game = generate_and_save_game(
             num_discard_cards=exp_num_discard_cards,
             target_epsilon=exp_target_epsilon,
             target_delta=exp_target_delta,
+            beta=beta
         )
         psp_run_and_save_stats(
             game=random_game,
             target_epsilon=exp_target_epsilon,
             target_delta=exp_target_delta,
             number_psp_runs=exp_number_psp_runs,
+            beta=beta
         )
         print(
             f"took {time.time() - t0 : .2f} secs to run game with parameters: "

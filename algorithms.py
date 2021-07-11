@@ -26,17 +26,24 @@ def compute_stats(U, V, m, c, delta, T, size_of_game):
 
 
 def compute_schedule_length(target_epsilon, c=2.0, beta=2.0):
-    return math.ceil(math.log((3.0 * c) / (4.0 * target_epsilon), beta))
+    return max(1, math.floor(math.log((3.0 * c) / (14.0 * target_epsilon), beta))) #alpha 7/3
+    #return max(1, math.floor(math.log((3.0 * c) / (4.0 * target_epsilon), beta))) #alpha 2/3
 
 
 def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
 
     # Initialize schedule and other structures.
     T = compute_schedule_length(target_epsilon, c, beta)
+    alpha = ((7.0 * c) / (3.0 * target_epsilon)) * math.log(
+        (3.0 * T * game["size_of_game"]) / target_delta
+    )
+
+    """
     S = len(game["strategy_profiles"].keys())
     alpha = ((2.0 * c) / (3.0 * target_epsilon)) * math.log(
         (3.0 * T * S) / target_delta
     )
+    """
     active_set = game["strategy_profiles"].keys()
     stats = {strategy_profile: {"U": 0, "V": 0} for strategy_profile in active_set}
     m = 0
@@ -44,10 +51,12 @@ def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
     psp_stats = {
         "stats": stats,
         "schedule": [math.ceil(alpha * (beta ** t)) for t in range(1, T + 1)],
-        "active_set_len": [game["size_of_game"]],
+        "active_set_len": [],
         "emp_simulation_complexity": 0,
         "emp_sample_complexity": 0,
         "epsilon_map": {strategy_profile: math.inf for strategy_profile in active_set},
+        "estimate_map": {strategy_profile: 0 for strategy_profile in active_set},
+        "variance_map": {strategy_profile: 0 for strategy_profile in active_set},
     }
 
     # Iterate as per the schedule
@@ -62,6 +71,9 @@ def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
 
         # Draw randomness. In poker, draw dealer cards.
         random_cards = draw_randomness(game, m_marginal)
+
+        #Account for the active set
+        psp_stats["active_set_len"].append(len(active_set))
 
         # Simulation complexity: sum of the number of samples processed times the number of strategy profiles that are active
         psp_stats["emp_simulation_complexity"] += m_marginal * len(active_set)
@@ -90,13 +102,16 @@ def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
                 T,
                 game["size_of_game"],
             )
+
+            psp_stats["estimate_map"][s] = stats[s]["U"] / m
+            psp_stats["variance_map"][s] = (stats[s]["V"] - stats[s]["U"] ** 2 / m) / (m - 1)
+
         # Prune well-estimated strategy profiles.
         active_set = {
             strategy_profile
             for strategy_profile in active_set
             if psp_stats["epsilon_map"][strategy_profile] > target_epsilon
         }
-        psp_stats["active_set_len"].append(len(active_set))
 
         # If there are no more active strategy profiles, return
         if len(active_set) == 0:

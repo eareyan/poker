@@ -74,25 +74,21 @@ def compute_v_1_inf(game_stats):
     return sum([stats["variance"] for stats in game_stats.values()])
 
 
-def compute_sample_complexity(schedule_length, epsilon, delta, v_inf, game, c=2):
-    return 2 + 4 * math.log(3 * schedule_length * game["size_of_game"] / delta) * (
-        2 * c / epsilon + v_inf / epsilon ** 2
-    )
+def compute_sample_complexity(schedule_length, epsilon, delta, v_inf, game, c=2, beta=2):
+    return 2 + math.ceil(2 * beta * math.log(3 * schedule_length * game["size_of_game"] / delta) * (2 * c / epsilon + v_inf / epsilon ** 2 ))
 
 
-def compute_simulation_complexity(schedule_length, epsilon, delta, v_1_inf, game, c=2):
-    return 2 + 4 * math.log(3 * schedule_length * game["size_of_game"] / delta) * (
-        2 * c * game["size_of_game"] / (2 * epsilon) + v_1_inf / epsilon ** 2
-    )
+def compute_simulation_complexity(schedule_length, epsilon, delta, v_1_inf, game, c=2, beta=2):
+    return 2 + math.ceil(2 * beta * math.log(3 * schedule_length * game["size_of_game"] / delta) * (2 * c * game["size_of_game"] / (2 / 2 * epsilon) + v_1_inf / epsilon ** 2))
 
 
-def compute_bounds(schedule_length, epsilon, delta, v_inf, v_1_inf, game, c=2):
+def compute_bounds(schedule_length, epsilon, delta, v_inf, v_1_inf, game, c=2, beta=2):
     return (
         compute_sample_complexity(
-            schedule_length, epsilon, delta, v_inf, game, c
+            schedule_length, epsilon, delta, v_inf, game, c, beta
         ),
         compute_simulation_complexity(
-            schedule_length, epsilon, delta, v_1_inf, game, c
+            schedule_length, epsilon, delta, v_1_inf, game, c, beta
         ),
     )
 
