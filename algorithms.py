@@ -26,8 +26,10 @@ def compute_stats(U, V, m, c, delta, T, size_of_game):
 
 
 def compute_schedule_length(target_epsilon, c=2.0, beta=2.0):
-    return max(1, math.floor(math.log((3.0 * c) / (14.0 * target_epsilon), beta))) #alpha 7/3
-    #return max(1, math.floor(math.log((3.0 * c) / (4.0 * target_epsilon), beta))) #alpha 2/3
+    return max(
+        1, math.floor(math.log((3.0 * c) / (14.0 * target_epsilon), beta))
+    )  # alpha 7/3
+    # return max(1, math.floor(math.log((3.0 * c) / (4.0 * target_epsilon), beta))) #alpha 2/3
 
 
 def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
@@ -72,7 +74,7 @@ def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
         # Draw randomness. In poker, draw dealer cards.
         random_cards = draw_randomness(game, m_marginal)
 
-        #Account for the active set
+        # Account for the active set
         psp_stats["active_set_len"].append(len(active_set))
 
         # Simulation complexity: sum of the number of samples processed times the number of strategy profiles that are active
@@ -104,7 +106,9 @@ def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
             )
 
             psp_stats["estimate_map"][s] = stats[s]["U"] / m
-            psp_stats["variance_map"][s] = (stats[s]["V"] - stats[s]["U"] ** 2 / m) / (m - 1)
+            psp_stats["variance_map"][s] = (stats[s]["V"] - stats[s]["U"] ** 2 / m) / (
+                m - 1
+            )
 
         # Prune well-estimated strategy profiles.
         active_set = {

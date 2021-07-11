@@ -18,9 +18,7 @@ from stats import (
 def generate_and_save_game(num_discard_cards, target_epsilon, target_delta, beta):
     # Draw a random game.
     game = sample_game(num_discard_cards=num_discard_cards)
-    #game = generate_rigged_game()
-
-
+    # game = generate_rigged_game()
 
     # Compute the game's stats.
     game_stats = compute_game_stats(game=game)
@@ -35,7 +33,7 @@ def generate_and_save_game(num_discard_cards, target_epsilon, target_delta, beta
         v_inf=v_inf,
         v_1_inf=v_1_inf,
         game=game,
-        beta=beta
+        beta=beta,
     )
 
     pd.DataFrame(
@@ -114,30 +112,33 @@ if __name__ == "__main__":
     check_if_results_file_exists()
 
     # Fixed parameters: delta, and the number of psp runs.
-    exp_target_delta = 1e-2
+    exp_target_delta = 0.05
     exp_number_psp_runs = 1
+    number_of_games = 10
+    exp_target_eps_grid = [0.01]
+    exp_num_discard_cards_grid = [1, 2]
 
-    #beta = 2
-    #beta = 1.25
+    # beta = 2
+    # beta = 1.25
     beta = 1.1
-    #beta = 1.05
+    # beta = 1.05
 
     for _, exp_num_discard_cards, exp_target_epsilon in it.product(
-        range(1), [1, 2], [0.01]
+        range(number_of_games), exp_num_discard_cards_grid, exp_target_eps_grid
     ):
         t0 = time.time()
         random_game = generate_and_save_game(
             num_discard_cards=exp_num_discard_cards,
             target_epsilon=exp_target_epsilon,
             target_delta=exp_target_delta,
-            beta=beta
+            beta=beta,
         )
         psp_run_and_save_stats(
             game=random_game,
             target_epsilon=exp_target_epsilon,
             target_delta=exp_target_delta,
             number_psp_runs=exp_number_psp_runs,
-            beta=beta
+            beta=beta,
         )
         print(
             f"took {time.time() - t0 : .2f} secs to run game with parameters: "
