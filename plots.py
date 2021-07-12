@@ -50,7 +50,9 @@ def bounds_line(num_discard_cards):
     }
 
 
-def game_scatter_plot(results, num_discard_cards, markersize=2.5, dot_transparency=0.5):
+def game_scatter_plot(
+    results, num_discard_cards, do_floor, markersize=2.5, dot_transparency=0.5
+):
     # Select results based on num_discard_cards
     results_to_plot = results[results["num_discard_cards"] == num_discard_cards]
 
@@ -59,9 +61,11 @@ def game_scatter_plot(results, num_discard_cards, markersize=2.5, dot_transparen
 
     # Set plot title.
     if num_discard_cards == 1:
-        fig.suptitle(f"Players discard {num_discard_cards} card.")
+        fig.suptitle(f"Players discard {num_discard_cards} card. do_floor = {do_floor}")
     else:
-        fig.suptitle(f"Players discard {num_discard_cards} cards.")
+        fig.suptitle(
+            f"Players discard {num_discard_cards} cards. do_floor = {do_floor}"
+        )
 
     # Scatter plot for Empirical sample complexity
     x = results_to_plot["v_inf"]
@@ -96,14 +100,20 @@ def game_scatter_plot(results, num_discard_cards, markersize=2.5, dot_transparen
     figure = plt.gcf()
     figure.set_size_inches(8, 4)
     plt.tight_layout()
-    plt.savefig(f"plots/num_discard_cards-{num_discard_cards}.pdf", bbox_inches="tight")
+    plt.savefig(
+        f"plots/num_discard_cards-{num_discard_cards}_do_floor_{do_floor}.pdf",
+        bbox_inches="tight",
+    )
 
 
 if __name__ == "__main__":
 
+    # Experiments Parameters:
+    exp_do_floor = True
+
     # Read results
-    games = pd.read_csv("results/games.csv")
-    psp_runs = pd.read_csv("results/psp_runs.csv")
+    games = pd.read_csv(f"results/games_do_floor_{exp_do_floor}.csv")
+    psp_runs = pd.read_csv(f"results/psp_runs_do_floor_{exp_do_floor}.csv")
 
     exp_results = games.merge(
         psp_runs,
@@ -111,8 +121,8 @@ if __name__ == "__main__":
         left_on="game_id",
         right_on="game_id",
     )
-    exp_results.to_csv("results/join.csv", index=None)
+    exp_results.to_csv(f"results/join_do_floor_{exp_do_floor}.csv", index=None)
 
     # Plot results.
-    game_scatter_plot(results=exp_results, num_discard_cards=1)
-    game_scatter_plot(results=exp_results, num_discard_cards=2)
+    game_scatter_plot(results=exp_results, num_discard_cards=1, do_floor=exp_do_floor)
+    game_scatter_plot(results=exp_results, num_discard_cards=2, do_floor=exp_do_floor)

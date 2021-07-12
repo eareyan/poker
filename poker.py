@@ -66,7 +66,7 @@ def draw_randomness(game, m):
     return [random.sample(game["deck"], game["num_discard_cards"]) for _ in range(m)]
 
 
-def simulate_game(strategy_profile, game, list_of_dealer_cards):
+def simulate_game(strategy_profile, game, list_of_dealer_cards, do_floor):
     """
     Given a strategy profile, a game, and a list of dealer cards, this function scores the strategy profile for each
     card and return the sum of the scores and the sum of scores squares. Note that we assume a zero-sum game so that
@@ -75,6 +75,7 @@ def simulate_game(strategy_profile, game, list_of_dealer_cards):
     :param strategy_profile: a strategy profile.
     :param game: a poker game.
     :param list_of_dealer_cards: a list with cards.
+    :param do_floor:
     :return: sum of scores and sum of scores squared.
     """
     data = game["strategy_profiles"][strategy_profile]
@@ -83,7 +84,7 @@ def simulate_game(strategy_profile, game, list_of_dealer_cards):
     for dealer_cards in list_of_dealer_cards:
         p1_complete_hand = append_cards(data["p1"]["hand"], dealer_cards)
         p2_complete_hand = append_cards(data["p2"]["hand"], dealer_cards)
-        p1_points = left_hand_points(p1_complete_hand, p2_complete_hand)
+        p1_points = left_hand_points(p1_complete_hand, p2_complete_hand, do_floor)
         total_sum_p1_points += p1_points
         total_sum_p1_points_squared += p1_points ** 2
 

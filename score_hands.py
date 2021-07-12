@@ -1,4 +1,5 @@
 import functools
+import math
 import time
 
 import pandas as pd
@@ -23,26 +24,32 @@ def get_scores_dict():
 HANDS_RANKS_SCORE_DICT = None
 
 
-def get_hand_score(hand):
+def get_hand_score(hand, do_floor):
     """
     Scores a given hand. Implements a singleton on variable HANDS_RANKS_SCORE_DICT
     so that it is loaded into memory only once.
     :param hand: a hand.
+    :param do_floor: floors card scores.
     :return:  the score of the hand.
     """
     global HANDS_RANKS_SCORE_DICT
     if HANDS_RANKS_SCORE_DICT is None:
         HANDS_RANKS_SCORE_DICT = get_scores_dict()
-    return HANDS_RANKS_SCORE_DICT[str(hand).replace(",", "")]
+    return (
+        HANDS_RANKS_SCORE_DICT[str(hand).replace(",", "")]
+        if not do_floor
+        else math.floor(HANDS_RANKS_SCORE_DICT[str(hand).replace(",", "")])
+    )
 
 
 def left_hand_points(
     left_hand,
     right_hand,
+    do_floor,
 ):
-    if get_hand_score(left_hand) > get_hand_score(right_hand):
+    if get_hand_score(left_hand, do_floor) > get_hand_score(right_hand, do_floor):
         return 1
-    elif get_hand_score(left_hand) < get_hand_score(right_hand):
+    elif get_hand_score(left_hand, do_floor) < get_hand_score(right_hand, do_floor):
         return -1
     else:
         return 0

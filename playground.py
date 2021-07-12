@@ -28,7 +28,7 @@ if __name__ == "__main__":
     for strategy_profile in some_game["strategy_profiles"]:
         for dealer_card in some_game["deck"]:
             total_sum_p1_points, total_sum_p1_points_squared = simulate_game(
-                strategy_profile, some_game, [[dealer_card]]
+                strategy_profile, some_game, [[dealer_card]], do_floor=False
             )
             results.append([strategy_profile, dealer_card, total_sum_p1_points])
     print(

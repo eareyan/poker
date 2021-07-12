@@ -1,7 +1,5 @@
-import itertools as it
-import pprint
-from pathlib import Path
 import time
+from pathlib import Path
 
 import pandas as pd
 
@@ -15,13 +13,15 @@ from stats import (
 )
 
 
-def generate_and_save_game(num_discard_cards, target_epsilon, target_delta, beta):
+def generate_and_save_game(
+    num_discard_cards, target_epsilon, target_delta, beta, do_floor
+):
     # Draw a random game.
     game = sample_game(num_discard_cards=num_discard_cards)
     # game = generate_rigged_game()
 
     # Compute the game's stats.
-    game_stats = compute_game_stats(game=game)
+    game_stats = compute_game_stats(game=game, do_floor=do_floor)
     v_inf = compute_v_inf(game_stats=game_stats)
     v_1_inf = compute_v_1_inf(game_stats=game_stats)
 
@@ -52,17 +52,21 @@ def generate_and_save_game(num_discard_cards, target_epsilon, target_delta, beta
                 simulation_complexity,
             ]
         ]
-    ).to_csv("results/games.csv", mode="a", index=False, header=False)
+    ).to_csv(f"results/games_do_floor_{do_floor}.csv", mode="a", index=False, header=False)
 
     return game
 
 
-def psp_run_and_save_stats(game, target_epsilon, target_delta, number_psp_runs, beta):
+def psp_run_and_save_stats(
+    game, target_epsilon, target_delta, number_psp_runs, beta, do_floor
+):
 
     # Run PSP multiple times, collect and save stats.
     results = []
     for _ in range(0, number_psp_runs):
-        psp_stats = psp(game, target_epsilon, target_delta, beta=beta)
+        psp_stats = psp(
+            game, target_epsilon, target_delta, beta=beta, do_floor=do_floor
+        )
         # pprint.pprint(psp_stats)
         results.append(
             [
@@ -74,11 +78,11 @@ def psp_run_and_save_stats(game, target_epsilon, target_delta, number_psp_runs, 
 
     # Save results.
     results_df = pd.DataFrame(results)
-    results_df.to_csv("results/psp_runs.csv", mode="a", index=False, header=False)
+    results_df.to_csv(f"results/psp_runs_do_floor_{do_floor}.csv", mode="a", index=False, header=False)
 
 
-def check_if_results_file_exists():
-    if not Path("results/psp_runs.csv").is_file():
+def check_if_results_file_exists(do_floor):
+    if not Path(f"results/games_do_floor_{do_floor}.csv").is_file():
         pd.DataFrame(
             [],
             columns=[
@@ -94,9 +98,9 @@ def check_if_results_file_exists():
                 "sample_complexity",
                 "simulation_complexity",
             ],
-        ).to_csv("results/games.csv", index=False)
+        ).to_csv(f"results/games_do_floor_{do_floor}.csv", index=False)
 
-    if not Path("results/psp_runs.csv").is_file():
+    if not Path(f"results/psp_runs_do_floor_{do_floor}.csv").is_file():
         pd.DataFrame(
             [],
             columns=[
@@ -104,12 +108,10 @@ def check_if_results_file_exists():
                 "emp_sample_complexity",
                 "emp_simulation_complexity",
             ],
-        ).to_csv("results/psp_runs.csv", index=False)
+        ).to_csv(f"results/psp_runs_do_floor_{do_floor}.csv", index=False)
 
 
 if __name__ == "__main__":
-
-    check_if_results_file_exists()
 
     # Fixed parameters: delta, and the number of psp runs.
     exp_target_delta = 0.05
@@ -117,11 +119,14 @@ if __name__ == "__main__":
     number_of_games = 100
     exp_target_eps_grid = [0.01]
     exp_num_discard_cards_grid = [1, 2]
+    exp_do_floor = True
 
     # beta = 2
     # beta = 1.25
-    beta = 1.1
+    exp_beta = 1.1
     # beta = 1.05
+
+    check_if_results_file_exists(exp_do_floor)
 
     for _, exp_num_discard_cards, exp_target_epsilon in it.product(
         range(number_of_games), exp_num_discard_cards_grid, exp_target_eps_grid
@@ -131,14 +136,16 @@ if __name__ == "__main__":
             num_discard_cards=exp_num_discard_cards,
             target_epsilon=exp_target_epsilon,
             target_delta=exp_target_delta,
-            beta=beta,
+            beta=exp_beta,
+            do_floor=exp_do_floor,
         )
         psp_run_and_save_stats(
             game=random_game,
             target_epsilon=exp_target_epsilon,
             target_delta=exp_target_delta,
             number_psp_runs=exp_number_psp_runs,
-            beta=beta,
+            beta=exp_beta,
+            do_floor=exp_do_floor,
         )
         print(
             f"took {time.time() - t0 : .2f} secs to run game with parameters: "

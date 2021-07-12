@@ -32,7 +32,7 @@ def compute_schedule_length(target_epsilon, c=2.0, beta=2.0):
     # return max(1, math.floor(math.log((3.0 * c) / (4.0 * target_epsilon), beta))) #alpha 2/3
 
 
-def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
+def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0, do_floor=False):
 
     # Initialize schedule and other structures.
     T = compute_schedule_length(target_epsilon, c, beta)
@@ -88,6 +88,7 @@ def psp(game, target_epsilon, target_delta, c=2.0, beta=2.0):
                 strategy_profile=s,
                 game=game,
                 list_of_dealer_cards=random_cards,
+                do_floor=do_floor,
             )
 
             # Accumulate stats.
