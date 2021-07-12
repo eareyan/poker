@@ -66,7 +66,7 @@ def game_scatter_plot(results, num_discard_cards):
     # Scatter plot for Empirical sample complexity
     x = results_to_plot["v_inf"]
     y = results_to_plot["emp_sample_complexity"]
-    ax1.plot(x, y, "o", color="blue")
+    ax1.plot(x, y, "o", color="blue", markersize=3)
     ax1.set_title("Empirical sample complexity")
     ax1.set_xlim(0, 1)
     ax1.set_ylim(0)
@@ -77,7 +77,7 @@ def game_scatter_plot(results, num_discard_cards):
     # Scatter plot for Empirical simulation complexity
     x = results_to_plot["v_1_inf"]
     y = results_to_plot["emp_simulation_complexity"]
-    ax2.plot(x, y, "o", color="red")
+    ax2.plot(x, y, "o", color="red", markersize=3)
     ax2.set_title("Empirical simulation complexity")
     ax2.set_xlim(0, 100 if num_discard_cards == 2 else 25)
     ax2.set_ylim(0)
@@ -96,7 +96,7 @@ def game_scatter_plot(results, num_discard_cards):
     figure = plt.gcf()
     figure.set_size_inches(8, 4)
     plt.tight_layout()
-    plt.savefig(f"plots/num_discard_cards-{num_discard_cards}.png", bbox_inches="tight")
+    plt.savefig(f"plots/num_discard_cards-{num_discard_cards}.pdf", bbox_inches="tight")
 
 
 if __name__ == "__main__":
