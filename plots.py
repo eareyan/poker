@@ -70,7 +70,8 @@ def game_scatter_plot(results, num_discard_cards):
     ax1.set_title("Empirical sample complexity")
     ax1.set_xlim(0, 1)
     ax1.set_ylim(0)
-    ax1.yaxis.set_major_formatter(mtick.FormatStrFormatter("%.1e"))
+    # ax1.yaxis.set_major_formatter(mtick.FormatStrFormatter("%.1e"))
+    ax1.yaxis.set_major_formatter(mtick.FormatStrFormatter("%2.0f"))
     ax1.set_xlabel(r"$||v||_{\infty}$")
 
     # Scatter plot for Empirical simulation complexity
@@ -80,19 +81,21 @@ def game_scatter_plot(results, num_discard_cards):
     ax2.set_title("Empirical simulation complexity")
     ax2.set_xlim(0, 100 if num_discard_cards == 2 else 25)
     ax2.set_ylim(0)
-    ax2.yaxis.set_major_formatter(mtick.FormatStrFormatter("%.1e"))
+    # ax2.yaxis.set_major_formatter(mtick.FormatStrFormatter("%.1e"))
+    ax2.yaxis.set_major_formatter(mtick.FormatStrFormatter("%2.0f"))
     ax2.set_xlabel(r"$||v||_{1,\infty}$")
 
     # Plot bounds
     bounds = bounds_line(num_discard_cards=num_discard_cards)
-    ax1.plot(bounds["v_inf_grid"]["x"], bounds["v_inf_grid"]["y"], "--", color="black")
+    ax1.plot(bounds["v_inf_grid"]["x"], bounds["v_inf_grid"]["y"], "-", color="black")
     ax2.plot(
-        bounds["v_1_inf_grid"]["x"], bounds["v_1_inf_grid"]["y"], "--", color="black"
+        bounds["v_1_inf_grid"]["x"], bounds["v_1_inf_grid"]["y"], "-", color="black"
     )
 
     # Plot and save figure.
     figure = plt.gcf()
-    figure.set_size_inches(12, 6)
+    figure.set_size_inches(8, 4)
+    plt.tight_layout()
     plt.savefig(f"plots/num_discard_cards-{num_discard_cards}.png", bbox_inches="tight")
 
 

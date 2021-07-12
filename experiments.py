@@ -114,7 +114,7 @@ if __name__ == "__main__":
     # Fixed parameters: delta, and the number of psp runs.
     exp_target_delta = 0.05
     exp_number_psp_runs = 1
-    number_of_games = 1
+    number_of_games = 100
     exp_target_eps_grid = [0.01]
     exp_num_discard_cards_grid = [1, 2]
 
