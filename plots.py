@@ -50,7 +50,7 @@ def bounds_line(num_discard_cards):
     }
 
 
-def game_scatter_plot(results, num_discard_cards):
+def game_scatter_plot(results, num_discard_cards, markersize=2.5, dot_transparency=0.5):
     # Select results based on num_discard_cards
     results_to_plot = results[results["num_discard_cards"] == num_discard_cards]
 
@@ -66,7 +66,7 @@ def game_scatter_plot(results, num_discard_cards):
     # Scatter plot for Empirical sample complexity
     x = results_to_plot["v_inf"]
     y = results_to_plot["emp_sample_complexity"]
-    ax1.plot(x, y, "o", color="blue", markersize=3)
+    ax1.plot(x, y, "o", color="blue", markersize=markersize, alpha=dot_transparency)
     ax1.set_title("Empirical sample complexity")
     ax1.set_xlim(0, 1)
     ax1.set_ylim(0)
@@ -77,8 +77,8 @@ def game_scatter_plot(results, num_discard_cards):
     # Scatter plot for Empirical simulation complexity
     x = results_to_plot["v_1_inf"]
     y = results_to_plot["emp_simulation_complexity"]
-    ax2.plot(x, y, "o", color="red", markersize=3)
-    ax2.set_title("Empirical simulation complexity")
+    ax2.plot(x, y, "o", color="red", markersize=markersize, alpha=dot_transparency)
+    ax2.set_title("Empirical query complexity")
     ax2.set_xlim(0, 100 if num_discard_cards == 2 else 25)
     ax2.set_ylim(0)
     # ax2.yaxis.set_major_formatter(mtick.FormatStrFormatter("%.1e"))
