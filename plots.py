@@ -50,27 +50,27 @@ def bounds_line(num_discard_cards):
     }
 
 
-def game_scatter_plot(
-    results, num_discard_cards, do_floor, markersize=2.5, dot_transparency=0.5
+def plot_empirical_qtts(
+    num_discard_cards,
+    results_to_plot,
+    ax1,
+    ax2,
+    marker_shape,
+    markersize,
+    dot_transparency,
+    colors,
 ):
-    # Select results based on num_discard_cards
-    results_to_plot = results[results["num_discard_cards"] == num_discard_cards]
-
-    # Plotting side-by-side.
-    fig, (ax1, ax2) = plt.subplots(1, 2)
-
-    # Set plot title.
-    if num_discard_cards == 1:
-        fig.suptitle(f"Players discard {num_discard_cards} card. do_floor = {do_floor}")
-    else:
-        fig.suptitle(
-            f"Players discard {num_discard_cards} cards. do_floor = {do_floor}"
-        )
-
     # Scatter plot for Empirical sample complexity
     x = results_to_plot["v_inf"]
     y = results_to_plot["emp_sample_complexity"]
-    ax1.plot(x, y, "o", color="blue", markersize=markersize, alpha=dot_transparency)
+    ax1.plot(
+        x,
+        y,
+        marker_shape,
+        color=colors["emp_sample_complexity"],
+        markersize=markersize,
+        alpha=dot_transparency,
+    )
     ax1.set_title("Empirical sample complexity")
     ax1.set_xlim(0, 1)
     ax1.set_ylim(0)
@@ -81,7 +81,14 @@ def game_scatter_plot(
     # Scatter plot for Empirical simulation complexity
     x = results_to_plot["v_1_inf"]
     y = results_to_plot["emp_simulation_complexity"]
-    ax2.plot(x, y, "o", color="red", markersize=markersize, alpha=dot_transparency)
+    ax2.plot(
+        x,
+        y,
+        marker_shape,
+        color=colors["emp_simulation_complexity"],
+        markersize=markersize,
+        alpha=dot_transparency,
+    )
     ax2.set_title("Empirical query complexity")
     ax2.set_xlim(0, 100 if num_discard_cards == 2 else 25)
     ax2.set_ylim(0)
@@ -89,6 +96,8 @@ def game_scatter_plot(
     ax2.yaxis.set_major_formatter(mtick.FormatStrFormatter("%2.0f"))
     ax2.set_xlabel(r"$||v||_{1,\infty}$")
 
+
+def plot_bounds(num_discard_cards, ax1, ax2):
     # Plot bounds
     bounds = bounds_line(num_discard_cards=num_discard_cards)
     ax1.plot(bounds["v_inf_grid"]["x"], bounds["v_inf_grid"]["y"], "-", color="black")
@@ -96,21 +105,19 @@ def game_scatter_plot(
         bounds["v_1_inf_grid"]["x"], bounds["v_1_inf_grid"]["y"], "-", color="black"
     )
 
+
+def plot_and_save(num_discard_cards):
     # Plot and save figure.
     figure = plt.gcf()
     figure.set_size_inches(8, 4)
     plt.tight_layout()
     plt.savefig(
-        f"plots/num_discard_cards-{num_discard_cards}_do_floor_{do_floor}.pdf",
+        f"plots/num_discard_cards_{num_discard_cards}.pdf",
         bbox_inches="tight",
     )
 
 
-if __name__ == "__main__":
-
-    # Experiments Parameters:
-    exp_do_floor = True
-
+def get_data(exp_do_floor):
     # Read results
     games = pd.read_csv(f"results/games_do_floor_{exp_do_floor}.csv")
     psp_runs = pd.read_csv(f"results/psp_runs_do_floor_{exp_do_floor}.csv")
@@ -122,7 +129,52 @@ if __name__ == "__main__":
         right_on="game_id",
     )
     exp_results.to_csv(f"results/join_do_floor_{exp_do_floor}.csv", index=None)
+    return exp_results
 
-    # Plot results.
-    game_scatter_plot(results=exp_results, num_discard_cards=1, do_floor=exp_do_floor)
-    game_scatter_plot(results=exp_results, num_discard_cards=2, do_floor=exp_do_floor)
+
+if __name__ == "__main__":
+
+    # Read Data
+    do_floor = get_data(exp_do_floor=True)
+    no_floor = get_data(exp_do_floor=False)
+
+    # Parameters
+    exp_num_discard_cards = 1
+
+    # Plot results, side-by-side.
+    exp_fig, (exp_ax1, exp_ax2) = plt.subplots(1, 2)
+
+    # Set plot title.
+    exp_fig.suptitle(
+        f"Players discard {exp_num_discard_cards} "
+        f"card{'' if exp_num_discard_cards == 1 else 's'}."
+    )
+
+    plot_empirical_qtts(
+        num_discard_cards=exp_num_discard_cards,
+        results_to_plot=do_floor[
+            do_floor["num_discard_cards"] == exp_num_discard_cards
+        ],
+        ax1=exp_ax1,
+        ax2=exp_ax2,
+        marker_shape="x",
+        markersize=3.5,
+        dot_transparency=0.5,
+        colors={"emp_sample_complexity": "red", "emp_simulation_complexity": "blue"},
+    )
+
+    plot_empirical_qtts(
+        num_discard_cards=exp_num_discard_cards,
+        results_to_plot=no_floor[
+            no_floor["num_discard_cards"] == exp_num_discard_cards
+        ],
+        ax1=exp_ax1,
+        ax2=exp_ax2,
+        marker_shape="+",
+        markersize=3.5,
+        dot_transparency=0.5,
+        colors={"emp_sample_complexity": "blue", "emp_simulation_complexity": "red"},
+    )
+
+    plot_bounds(num_discard_cards=exp_num_discard_cards, ax1=exp_ax1, ax2=exp_ax2)
+    plot_and_save(num_discard_cards=exp_num_discard_cards)
