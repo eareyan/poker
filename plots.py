@@ -1,3 +1,5 @@
+import math
+
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import pandas as pd
@@ -5,14 +7,40 @@ import pandas as pd
 from algorithms import compute_schedule_length
 from stats import compute_sample_complexity, compute_simulation_complexity
 
+# TODO: Parameters of experiments: this is probably bad practice and needs to be refactored.
+exp_target_delta = 0.05
+exp_target_eps = 0.01
+beta = 1.1
+c = 2
+
+
+def compute_sample_asymptotic_bounds(num_discard_cards):
+    size_of_game = 100 if num_discard_cards == 2 else 25
+    v_inf_resolution_grid = [i * 0.01 for i in range(0, 110)]
+    v_1_inf_resolution_grid = [i for i in range(0, size_of_game + 10)]
+
+    v_inf_asymptotic = [
+        math.log((size_of_game * math.log(c / exp_target_eps)) / exp_target_delta)
+        * (c / exp_target_eps + v_inf / exp_target_eps ** 2)
+        for v_inf in v_inf_resolution_grid
+    ]
+
+    v_1_inf_asymptotic = [
+        math.log((size_of_game * math.log(c / exp_target_eps)) / exp_target_delta)
+        * (
+            (c * size_of_game) / (exp_target_eps * size_of_game / 2.0)
+            + v_1_inf / exp_target_eps ** 2
+        )
+        for v_1_inf in v_1_inf_resolution_grid
+    ]
+
+    return {
+        "v_inf_asymptotic": {"x": v_inf_resolution_grid, "y": v_inf_asymptotic},
+        "v_1_inf_asymptotic": {"x": v_1_inf_resolution_grid, "y": v_1_inf_asymptotic},
+    }
+
 
 def bounds_line(num_discard_cards):
-
-    # TODO: Parameters of experiments: this is probably bad practice and needs to be refactored.
-    exp_target_delta = 0.05
-    exp_target_eps = 0.01
-    beta = 1.1
-
     schedule_length = compute_schedule_length(target_epsilon=exp_target_eps, beta=beta)
     size_of_game = 100 if num_discard_cards == 2 else 25
     v_inf_resolution_grid = [i * 0.01 for i in range(0, 100)]
@@ -23,12 +51,12 @@ def bounds_line(num_discard_cards):
             schedule_length=schedule_length,
             epsilon=exp_target_eps,
             delta=exp_target_delta,
-            v_inf=x,
+            v_inf=v_inf,
             game={"size_of_game": size_of_game},
-            c=2,
+            c=c,
             beta=beta,
         )
-        for x in [i * 0.01 for i in range(0, 100)]
+        for v_inf in v_inf_resolution_grid
     ]
 
     v_1_inf_grid = [
@@ -36,12 +64,12 @@ def bounds_line(num_discard_cards):
             schedule_length=schedule_length,
             epsilon=exp_target_eps,
             delta=exp_target_delta,
-            v_1_inf=x,
+            v_1_inf=v_1_inf,
             game={"size_of_game": size_of_game},
-            c=2,
+            c=c,
             beta=beta,
         )
-        for x in v_1_inf_resolution_grid
+        for v_1_inf in v_1_inf_resolution_grid
     ]
 
     return {
@@ -104,6 +132,21 @@ def plot_bounds(num_discard_cards, ax1, ax2):
     ax2.plot(
         bounds["v_1_inf_grid"]["x"], bounds["v_1_inf_grid"]["y"], "-", color="black"
     )
+    asymptotic_bounds = compute_sample_asymptotic_bounds(
+        num_discard_cards=num_discard_cards
+    )
+    ax1.plot(
+        asymptotic_bounds["v_inf_asymptotic"]["x"],
+        asymptotic_bounds["v_inf_asymptotic"]["y"],
+        "-",
+        color="black",
+    )
+    ax2.plot(
+        asymptotic_bounds["v_1_inf_asymptotic"]["x"],
+        asymptotic_bounds["v_1_inf_asymptotic"]["y"],
+        "-",
+        color="black",
+    )
 
 
 def plot_and_save(num_discard_cards):
@@ -139,7 +182,7 @@ if __name__ == "__main__":
     no_floor = get_data(exp_do_floor=False)
 
     # Parameters
-    exp_num_discard_cards = 1
+    exp_num_discard_cards = 2
 
     # Plot results, side-by-side.
     exp_fig, (exp_ax1, exp_ax2) = plt.subplots(1, 2)
@@ -160,7 +203,7 @@ if __name__ == "__main__":
         marker_shape="x",
         markersize=3.5,
         dot_transparency=0.5,
-        colors={"emp_sample_complexity": "red", "emp_simulation_complexity": "blue"},
+        colors={"emp_sample_complexity": "red", "emp_simulation_complexity": "red"},
     )
 
     plot_empirical_qtts(
@@ -173,7 +216,7 @@ if __name__ == "__main__":
         marker_shape="+",
         markersize=3.5,
         dot_transparency=0.5,
-        colors={"emp_sample_complexity": "blue", "emp_simulation_complexity": "red"},
+        colors={"emp_sample_complexity": "blue", "emp_simulation_complexity": "blue"},
     )
 
     plot_bounds(num_discard_cards=exp_num_discard_cards, ax1=exp_ax1, ax2=exp_ax2)
