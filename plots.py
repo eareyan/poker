@@ -14,23 +14,40 @@ beta = 1.1
 c = 2
 
 
+# Copy paste from https://stackoverflow.com/questions/25750170/show-decimal-places-and-scientific-notation-on-the-axis-of-a-matplotlib-plot
+class MathTextSciFormatter(mtick.Formatter):
+    def __init__(self, fmt="%1.2e"):
+        self.fmt = fmt
+
+    def __call__(self, x, pos=None):
+        s = self.fmt % x
+        decimal_point = "."
+        positive_sign = "+"
+        tup = s.split("e")
+        significand = tup[0].rstrip(decimal_point)
+        sign = tup[1][0].replace(positive_sign, "")
+        exponent = tup[1][1:].lstrip("0")
+        if exponent:
+            exponent = "10^{%s%s}" % (sign, exponent)
+        if significand and exponent:
+            s = r"%s{\times}%s" % (significand, exponent)
+        else:
+            s = r"%s%s" % (significand, exponent)
+        return "${}$".format(s)
+
+
 def compute_sample_asymptotic_bounds(num_discard_cards):
     size_of_game = 100 if num_discard_cards == 2 else 25
     v_inf_resolution_grid = [i * 0.01 for i in range(0, 110)]
     v_1_inf_resolution_grid = [i for i in range(0, size_of_game + 10)]
 
     v_inf_asymptotic = [
-        math.log((size_of_game * math.log(c / exp_target_eps)) / exp_target_delta)
-        * (c / exp_target_eps + v_inf / exp_target_eps ** 2)
+        (v_inf / exp_target_eps ** 2) * math.log(size_of_game / exp_target_delta)
         for v_inf in v_inf_resolution_grid
     ]
 
     v_1_inf_asymptotic = [
-        math.log((size_of_game * math.log(c / exp_target_eps)) / exp_target_delta)
-        * (
-            (c * size_of_game) / (exp_target_eps * size_of_game / 2.0)
-            + v_1_inf / exp_target_eps ** 2
-        )
+        (v_1_inf / exp_target_eps ** 2) * math.log(size_of_game / exp_target_delta)
         for v_1_inf in v_1_inf_resolution_grid
     ]
 
@@ -102,8 +119,7 @@ def plot_empirical_qtts(
     ax1.set_title("Empirical sample complexity")
     ax1.set_xlim(0, 1)
     ax1.set_ylim(0)
-    # ax1.yaxis.set_major_formatter(mtick.FormatStrFormatter("%.1e"))
-    ax1.yaxis.set_major_formatter(mtick.FormatStrFormatter("%2.0f"))
+    ax1.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
     ax1.set_xlabel(r"$||v||_{\infty}$")
 
     # Scatter plot for Empirical simulation complexity
@@ -120,8 +136,8 @@ def plot_empirical_qtts(
     ax2.set_title("Empirical query complexity")
     ax2.set_xlim(0, 100 if num_discard_cards == 2 else 25)
     ax2.set_ylim(0)
-    # ax2.yaxis.set_major_formatter(mtick.FormatStrFormatter("%.1e"))
-    ax2.yaxis.set_major_formatter(mtick.FormatStrFormatter("%2.0f"))
+    ax2.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
+
     ax2.set_xlabel(r"$||v||_{1,\infty}$")
 
 
@@ -135,6 +151,9 @@ def plot_bounds(num_discard_cards, ax1, ax2):
     asymptotic_bounds = compute_sample_asymptotic_bounds(
         num_discard_cards=num_discard_cards
     )
+    # a = min(bounds["v_inf_grid"]["y"])
+    # b = max(bounds["v_inf_grid"]["y"])
+    # ax1.set_yticks(range(a, b, int((b - a) / 5)))
     ax1.plot(
         asymptotic_bounds["v_inf_asymptotic"]["x"],
         asymptotic_bounds["v_inf_asymptotic"]["y"],
@@ -152,7 +171,7 @@ def plot_bounds(num_discard_cards, ax1, ax2):
 def plot_and_save(num_discard_cards):
     # Plot and save figure.
     figure = plt.gcf()
-    figure.set_size_inches(8, 4)
+    figure.set_size_inches(4, 8)
     plt.tight_layout()
     plt.savefig(
         f"plots/num_discard_cards_{num_discard_cards}.pdf",
@@ -185,7 +204,7 @@ if __name__ == "__main__":
     exp_num_discard_cards = 2
 
     # Plot results, side-by-side.
-    exp_fig, (exp_ax1, exp_ax2) = plt.subplots(1, 2)
+    exp_fig, (exp_ax1, exp_ax2) = plt.subplots(2, 1)
 
     # Set plot title.
     exp_fig.suptitle(
