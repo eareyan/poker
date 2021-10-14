@@ -119,7 +119,7 @@ def plot_empirical_qtts(
     ax1.set_title("Empirical sample complexity")
     ax1.set_xlim(0, 1)
     ax1.set_ylim(0)
-    ax1.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
+    ax1.yaxis.set_major_formatter(MathTextSciFormatter("%1.1e"))
     ax1.set_xlabel(r"$||v||_{\infty}$")
 
     # Scatter plot for Empirical simulation complexity
@@ -136,7 +136,7 @@ def plot_empirical_qtts(
     ax2.set_title("Empirical query complexity")
     ax2.set_xlim(0, 100 if num_discard_cards == 2 else 25)
     ax2.set_ylim(0)
-    ax2.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
+    ax2.yaxis.set_major_formatter(MathTextSciFormatter("%1.1e"))
 
     ax2.set_xlabel(r"$||v||_{1,\infty}$")
 
@@ -221,7 +221,7 @@ if __name__ == "__main__":
         ax1=exp_ax1,
         ax2=exp_ax2,
         marker_shape=".",
-        markersize=3.5,
+        markersize=2.5,
         dot_transparency=0.5,
         colors={"emp_sample_complexity": "red", "emp_simulation_complexity": "red"},
     )
@@ -234,7 +234,7 @@ if __name__ == "__main__":
         ax1=exp_ax1,
         ax2=exp_ax2,
         marker_shape=".",
-        markersize=3.5,
+        markersize=2.5,
         dot_transparency=0.5,
         colors={"emp_sample_complexity": "blue", "emp_simulation_complexity": "blue"},
     )
