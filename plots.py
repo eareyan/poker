@@ -157,13 +157,13 @@ def plot_bounds(num_discard_cards, ax1, ax2):
     ax1.plot(
         asymptotic_bounds["v_inf_asymptotic"]["x"],
         asymptotic_bounds["v_inf_asymptotic"]["y"],
-        "-",
+        "--",
         color="black",
     )
     ax2.plot(
         asymptotic_bounds["v_1_inf_asymptotic"]["x"],
         asymptotic_bounds["v_1_inf_asymptotic"]["y"],
-        "-",
+        "--",
         color="black",
     )
 
@@ -174,8 +174,9 @@ def plot_and_save(num_discard_cards):
     figure.set_size_inches(4, 8)
     plt.tight_layout()
     plt.savefig(
-        f"plots/num_discard_cards_{num_discard_cards}.pdf",
+        f"plots/num_discard_cards_{num_discard_cards}.png",
         bbox_inches="tight",
+        transparent=True
     )
 
 
@@ -201,7 +202,7 @@ if __name__ == "__main__":
     no_floor = get_data(exp_do_floor=False)
 
     # Parameters
-    exp_num_discard_cards = 2
+    exp_num_discard_cards = 1
 
     # Plot results, side-by-side.
     exp_fig, (exp_ax1, exp_ax2) = plt.subplots(2, 1)
@@ -219,7 +220,7 @@ if __name__ == "__main__":
         ],
         ax1=exp_ax1,
         ax2=exp_ax2,
-        marker_shape="x",
+        marker_shape=".",
         markersize=3.5,
         dot_transparency=0.5,
         colors={"emp_sample_complexity": "red", "emp_simulation_complexity": "red"},
@@ -232,7 +233,7 @@ if __name__ == "__main__":
         ],
         ax1=exp_ax1,
         ax2=exp_ax2,
-        marker_shape="+",
+        marker_shape=".",
         markersize=3.5,
         dot_transparency=0.5,
         colors={"emp_sample_complexity": "blue", "emp_simulation_complexity": "blue"},
