@@ -174,7 +174,7 @@ def plot_and_save(num_discard_cards):
     figure.set_size_inches(4, 8)
     plt.tight_layout()
     plt.savefig(
-        f"plots/num_discard_cards_{num_discard_cards}.png",
+        f"plots/num_discard_cards_{num_discard_cards}.pdf",
         bbox_inches="tight",
         transparent=True
     )
@@ -221,7 +221,7 @@ if __name__ == "__main__":
         ax1=exp_ax1,
         ax2=exp_ax2,
         marker_shape=".",
-        markersize=2.5,
+        markersize=1.25,
         dot_transparency=0.5,
         colors={"emp_sample_complexity": "red", "emp_simulation_complexity": "red"},
     )
@@ -234,7 +234,7 @@ if __name__ == "__main__":
         ax1=exp_ax1,
         ax2=exp_ax2,
         marker_shape=".",
-        markersize=2.5,
+        markersize=1.25,
         dot_transparency=0.5,
         colors={"emp_sample_complexity": "blue", "emp_simulation_complexity": "blue"},
     )
