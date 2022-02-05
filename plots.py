@@ -97,7 +97,8 @@ def bounds_line(num_discard_cards):
 
 def plot_empirical_qtts(
     num_discard_cards,
-    results_to_plot,
+    results_emp_sample_complexity,
+    results_emp_simulation_complexity,
     ax1,
     ax2,
     marker_shape,
@@ -106,8 +107,8 @@ def plot_empirical_qtts(
     colors,
 ):
     # Scatter plot for Empirical sample complexity
-    x = results_to_plot["v_inf"]
-    y = results_to_plot["emp_sample_complexity"]
+    x = results_emp_sample_complexity["v_inf"]
+    y = results_emp_sample_complexity["emp_sample_complexity"]
     ax1.plot(
         x,
         y,
@@ -123,8 +124,8 @@ def plot_empirical_qtts(
     ax1.set_xlabel(r"$||v||_{\infty}$")
 
     # Scatter plot for Empirical simulation complexity
-    x = results_to_plot["v_1_inf"]
-    y = results_to_plot["emp_simulation_complexity"]
+    x = results_emp_simulation_complexity["v_1_inf"]
+    y = results_emp_simulation_complexity["emp_simulation_complexity"]
     ax2.plot(
         x,
         y,
@@ -176,14 +177,20 @@ def plot_and_save(num_discard_cards):
     plt.savefig(
         f"plots/num_discard_cards_{num_discard_cards}.pdf",
         bbox_inches="tight",
-        transparent=True
+        format="PDF",
+        transparent=True,
     )
 
 
-def get_data(exp_do_floor):
+def get_data(exp_do_floor, num_discard_cards, rel_path=''):
     # Read results
-    games = pd.read_csv(f"results/games_do_floor_{exp_do_floor}.csv")
-    psp_runs = pd.read_csv(f"results/psp_runs_do_floor_{exp_do_floor}.csv")
+    games_data_loc = f"{rel_path}results/games_do_floor_{exp_do_floor}.csv"
+    psp_data_loc = f"{rel_path}results/psp_runs_do_floor_{exp_do_floor}.csv"
+    print(f"Reading games from: {games_data_loc}")
+    print(f"Reading psp from: {psp_data_loc}")
+
+    games = pd.read_csv(games_data_loc)
+    psp_runs = pd.read_csv(psp_data_loc)
 
     exp_results = games.merge(
         psp_runs,
@@ -191,18 +198,29 @@ def get_data(exp_do_floor):
         left_on="game_id",
         right_on="game_id",
     )
-    exp_results.to_csv(f"results/join_do_floor_{exp_do_floor}.csv", index=None)
-    return exp_results
+
+    # Writing joined results
+    exp_results.to_csv(f"{rel_path}results/join_do_floor_{exp_do_floor}.csv", index=None)
+
+    # Select subset of data corresponding to the exp_num_discard_cards
+    data = exp_results[exp_results["num_discard_cards"] == num_discard_cards]
+
+    # De-dup and get final data
+    emp_sample_complexity_data = data.groupby(['v_inf', 'emp_sample_complexity']).count().reset_index()
+    emp_simulation_complexity_data = data.groupby(['v_1_inf', 'emp_simulation_complexity']).count().reset_index()
+
+    return emp_sample_complexity_data, emp_simulation_complexity_data
 
 
 if __name__ == "__main__":
+    # Parameters
+    exp_num_discard_cards = 2
 
     # Read Data
-    do_floor = get_data(exp_do_floor=True)
-    no_floor = get_data(exp_do_floor=False)
-
-    # Parameters
-    exp_num_discard_cards = 1
+    emp_sample_complexity_data_do_floor, emp_simulation_complexity_data_do_floor = \
+        get_data(exp_do_floor=True, num_discard_cards=exp_num_discard_cards)
+    emp_sample_complexity_data_no_floor, emp_simulation_complexity_data_no_floor = \
+        get_data(exp_do_floor=False, num_discard_cards=exp_num_discard_cards)
 
     # Plot results, side-by-side.
     exp_fig, (exp_ax1, exp_ax2) = plt.subplots(2, 1)
@@ -215,9 +233,8 @@ if __name__ == "__main__":
 
     plot_empirical_qtts(
         num_discard_cards=exp_num_discard_cards,
-        results_to_plot=do_floor[
-            do_floor["num_discard_cards"] == exp_num_discard_cards
-        ],
+        results_emp_sample_complexity=emp_sample_complexity_data_do_floor,
+        results_emp_simulation_complexity=emp_simulation_complexity_data_do_floor,
         ax1=exp_ax1,
         ax2=exp_ax2,
         marker_shape=".",
@@ -228,9 +245,8 @@ if __name__ == "__main__":
 
     plot_empirical_qtts(
         num_discard_cards=exp_num_discard_cards,
-        results_to_plot=no_floor[
-            no_floor["num_discard_cards"] == exp_num_discard_cards
-        ],
+        results_emp_sample_complexity=emp_sample_complexity_data_no_floor,
+        results_emp_simulation_complexity=emp_simulation_complexity_data_no_floor,
         ax1=exp_ax1,
         ax2=exp_ax2,
         marker_shape=".",
