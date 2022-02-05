@@ -143,6 +143,10 @@ def plot_empirical_qtts(
 
 
 def plot_bounds(num_discard_cards, ax1, ax2):
+    # Plot Hoeffding
+    size_of_game = math.comb(5, num_discard_cards) * math.comb(5, num_discard_cards)
+    ax1.axhline(y=math.log(2.0 * size_of_game / exp_target_delta) * (c * c) / (2.0 * exp_target_eps * exp_target_eps),
+                color='r', linestyle='-')
     # Plot bounds
     bounds = bounds_line(num_discard_cards=num_discard_cards)
     ax1.plot(bounds["v_inf_grid"]["x"], bounds["v_inf_grid"]["y"], "-", color="black")
@@ -214,7 +218,7 @@ def get_data(exp_do_floor, num_discard_cards, rel_path=''):
 
 if __name__ == "__main__":
     # Parameters
-    exp_num_discard_cards = 2
+    exp_num_discard_cards = 1
 
     # Read Data
     emp_sample_complexity_data_do_floor, emp_simulation_complexity_data_do_floor = \
