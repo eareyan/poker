@@ -2,6 +2,7 @@ import math
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
+import numpy as np
 import pandas as pd
 
 from algorithms import compute_schedule_length
@@ -36,8 +37,7 @@ class MathTextSciFormatter(mtick.Formatter):
         return "${}$".format(s)
 
 
-def compute_sample_asymptotic_bounds(num_discard_cards):
-    size_of_game = 100 if num_discard_cards == 2 else 25
+def compute_sample_asymptotic_bounds(size_of_game):
     v_inf_resolution_grid = [i * 0.01 for i in range(0, 110)]
     v_1_inf_resolution_grid = [i for i in range(0, size_of_game + 10)]
 
@@ -57,9 +57,8 @@ def compute_sample_asymptotic_bounds(num_discard_cards):
     }
 
 
-def bounds_line(num_discard_cards):
+def bounds_line(num_discard_cards, size_of_game):
     schedule_length = compute_schedule_length(target_epsilon=exp_target_eps, beta=beta)
-    size_of_game = 100 if num_discard_cards == 2 else 25
     v_inf_resolution_grid = [i * 0.01 for i in range(0, 100)]
     v_1_inf_resolution_grid = [i for i in range(0, size_of_game)]
 
@@ -110,12 +109,13 @@ def plot_empirical_qtts(
     x = results_emp_sample_complexity["v_inf"]
     y = results_emp_sample_complexity["emp_sample_complexity"]
     ax1.plot(
-        x,
-        y,
+        rand_jitter(x),
+        rand_jitter(y),
         marker_shape,
         color=colors["emp_sample_complexity"],
         markersize=markersize,
         alpha=dot_transparency,
+        linewidth=0
     )
     ax1.set_title("Empirical sample complexity")
     ax1.set_xlim(0, 1)
@@ -127,12 +127,13 @@ def plot_empirical_qtts(
     x = results_emp_simulation_complexity["v_1_inf"]
     y = results_emp_simulation_complexity["emp_simulation_complexity"]
     ax2.plot(
-        x,
-        y,
+        rand_jitter(x),
+        rand_jitter(y),
         marker_shape,
         color=colors["emp_simulation_complexity"],
         markersize=markersize,
         alpha=dot_transparency,
+        linewidth=0
     )
     ax2.set_title("Empirical query complexity")
     ax2.set_xlim(0, 100 if num_discard_cards == 2 else 25)
@@ -142,23 +143,19 @@ def plot_empirical_qtts(
     ax2.set_xlabel(r"$||v||_{1,\infty}$")
 
 
-def plot_bounds(num_discard_cards, ax1, ax2):
+def plot_bounds(num_discard_cards, size_of_game, ax1, ax2):
     # Plot Hoeffding
-    size_of_game = math.comb(5, num_discard_cards) * math.comb(5, num_discard_cards)
-    ax1.axhline(y=math.log(2.0 * size_of_game / exp_target_delta) * (c * c) / (2.0 * exp_target_eps * exp_target_eps),
-                color='r', linestyle='-')
+    H_bound = math.log(2.0 * size_of_game / exp_target_delta) * (c * c) / (2.0 * exp_target_eps * exp_target_eps)
+    ax1.axhline(y=H_bound, color='r', linestyle='-')
+    ax2.axhline(y=H_bound, color='r', linestyle='-')
     # Plot bounds
-    bounds = bounds_line(num_discard_cards=num_discard_cards)
+    bounds = bounds_line(num_discard_cards=num_discard_cards, size_of_game=size_of_game)
     ax1.plot(bounds["v_inf_grid"]["x"], bounds["v_inf_grid"]["y"], "-", color="black")
     ax2.plot(
         bounds["v_1_inf_grid"]["x"], bounds["v_1_inf_grid"]["y"], "-", color="black"
     )
-    asymptotic_bounds = compute_sample_asymptotic_bounds(
-        num_discard_cards=num_discard_cards
-    )
-    # a = min(bounds["v_inf_grid"]["y"])
-    # b = max(bounds["v_inf_grid"]["y"])
-    # ax1.set_yticks(range(a, b, int((b - a) / 5)))
+    asymptotic_bounds = compute_sample_asymptotic_bounds(size_of_game=size_of_game)
+
     ax1.plot(
         asymptotic_bounds["v_inf_asymptotic"]["x"],
         asymptotic_bounds["v_inf_asymptotic"]["y"],
@@ -186,6 +183,11 @@ def plot_and_save(num_discard_cards):
     )
 
 
+def rand_jitter(arr):
+    stdev = .01 * (max(arr) - min(arr))
+    return arr + np.random.randn(len(arr)) * stdev
+
+
 def get_data(exp_do_floor, num_discard_cards, rel_path=''):
     # Read results
     games_data_loc = f"{rel_path}results/games_do_floor_{exp_do_floor}.csv"
@@ -210,8 +212,10 @@ def get_data(exp_do_floor, num_discard_cards, rel_path=''):
     data = exp_results[exp_results["num_discard_cards"] == num_discard_cards]
 
     # De-dup and get final data
-    emp_sample_complexity_data = data.groupby(['v_inf', 'emp_sample_complexity']).count().reset_index()
-    emp_simulation_complexity_data = data.groupby(['v_1_inf', 'emp_simulation_complexity']).count().reset_index()
+    # emp_sample_complexity_data = data.groupby(['v_inf', 'emp_sample_complexity']).count().reset_index()
+    # emp_simulation_complexity_data = data.groupby(['v_1_inf', 'emp_simulation_complexity']).count().reset_index()
+    emp_sample_complexity_data = data[['v_inf', 'emp_sample_complexity']]
+    emp_simulation_complexity_data = data[['v_1_inf', 'emp_simulation_complexity']]
 
     return emp_sample_complexity_data, emp_simulation_complexity_data
 
@@ -219,6 +223,7 @@ def get_data(exp_do_floor, num_discard_cards, rel_path=''):
 if __name__ == "__main__":
     # Parameters
     exp_num_discard_cards = 1
+    exp_size_of_game = math.comb(5, exp_num_discard_cards) * math.comb(5, exp_num_discard_cards)
 
     # Read Data
     emp_sample_complexity_data_do_floor, emp_simulation_complexity_data_do_floor = \
@@ -241,9 +246,9 @@ if __name__ == "__main__":
         results_emp_simulation_complexity=emp_simulation_complexity_data_do_floor,
         ax1=exp_ax1,
         ax2=exp_ax2,
-        marker_shape=".",
+        marker_shape="o",
         markersize=1.25,
-        dot_transparency=0.5,
+        dot_transparency=1,
         colors={"emp_sample_complexity": "red", "emp_simulation_complexity": "red"},
     )
 
@@ -253,11 +258,11 @@ if __name__ == "__main__":
         results_emp_simulation_complexity=emp_simulation_complexity_data_no_floor,
         ax1=exp_ax1,
         ax2=exp_ax2,
-        marker_shape=".",
+        marker_shape="o",
         markersize=1.25,
-        dot_transparency=0.5,
+        dot_transparency=1,
         colors={"emp_sample_complexity": "blue", "emp_simulation_complexity": "blue"},
     )
 
-    plot_bounds(num_discard_cards=exp_num_discard_cards, ax1=exp_ax1, ax2=exp_ax2)
+    plot_bounds(num_discard_cards=exp_num_discard_cards, size_of_game=exp_size_of_game, ax1=exp_ax1, ax2=exp_ax2)
     plot_and_save(num_discard_cards=exp_num_discard_cards)
