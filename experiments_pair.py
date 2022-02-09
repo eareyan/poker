@@ -37,9 +37,9 @@ def run_pair_expt(deck, target_eps, target_delta, beta, do_floor):
             [
                 target_eps,
                 target_delta,
-                game_id,
                 beta,
                 do_floor,
+                game_id,
                 game["size_of_game"],
                 num_discard_cards,
                 hand_p1,
