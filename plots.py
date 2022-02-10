@@ -128,7 +128,7 @@ def plot_empirical_qtts(
     y = results_emp_simulation_complexity["emp_simulation_complexity"]
     ax2.scatter(
         x,
-        rand_jitter(y),
+        y,  # rand_jitter(y),
         s=markersize,
         marker=marker_shape,
         color=colors["emp_simulation_complexity"],
@@ -150,13 +150,23 @@ def plot_bounds(num_discard_cards, size_of_game, ax1, ax2):
         * (c * c)
         / (2.0 * exp_target_eps * exp_target_eps)
     )
-    ax1.axhline(y=H_bound, color="black", linestyle=":")
-    ax2.axhline(y=H_bound * size_of_game, color="black", linestyle=":")
+    ax1.axhline(y=H_bound, color="black", linestyle=":", zorder=0)
+    ax2.axhline(y=H_bound * size_of_game, color="black", linestyle=":", zorder=0)
     # Plot bounds
     bounds = bounds_line(num_discard_cards=num_discard_cards, size_of_game=size_of_game)
-    ax1.plot(bounds["v_inf_grid"]["x"], bounds["v_inf_grid"]["y"], "-", color="black")
+    ax1.plot(
+        bounds["v_inf_grid"]["x"],
+        bounds["v_inf_grid"]["y"],
+        "-",
+        color="black",
+        zorder=0,
+    )
     ax2.plot(
-        bounds["v_1_inf_grid"]["x"], bounds["v_1_inf_grid"]["y"], "-", color="black"
+        bounds["v_1_inf_grid"]["x"],
+        bounds["v_1_inf_grid"]["y"],
+        "-",
+        color="black",
+        zorder=0,
     )
     asymptotic_bounds = compute_sample_asymptotic_bounds(size_of_game=size_of_game)
 
@@ -165,12 +175,14 @@ def plot_bounds(num_discard_cards, size_of_game, ax1, ax2):
         asymptotic_bounds["v_inf_asymptotic"]["y"],
         "--",
         color="black",
+        zorder=0,
     )
     ax2.plot(
         asymptotic_bounds["v_1_inf_asymptotic"]["x"],
         asymptotic_bounds["v_1_inf_asymptotic"]["y"],
         "--",
         color="black",
+        zorder=0,
     )
 
 
